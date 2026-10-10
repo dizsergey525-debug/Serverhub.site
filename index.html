@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07110d">
+<title>SERVERHUB — управление Minecraft-сервером</title>
+<style>
+:root {
+  --bg:#07110d;
+  --panel:#101d16;
+  --panel2:#15251b;
+  --green:#42f58d;
+  --text:#f0fff5;
+  --muted:#a6b9ac;
+  --border:#294435;
+  --red:#ff7474;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:radial-gradient(ellipse at top,#163a27 0,#07110d 55%);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+}
+button,input {font:inherit}
+button {cursor:pointer}
+header {
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:#07110df2;
+  border-bottom:1px solid var(--border);
+  padding:15px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+.logo {font-size:23px;font-weight:900;letter-spacing:1px}
+.logo span {color:var(--green)}
+nav {display:flex;gap:8px;flex-wrap:wrap}
+.btn {
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:11px 15px;
+  background:var(--panel2);
+  color:var(--text);
+  font-weight:bold;
+}
+.btn:hover {border-color:var(--green)}
+.btn-green {
+  background:var(--green);
+  color:#062011;
+  border-color:var(--green);
+}
+.btn-green:hover {background:#7dffb0}
+.btn:disabled {opacity:.4;cursor:not-allowed}
+main {width:min(1050px,92%);margin:auto}
+.hero {text-align:center;padding:70px 0 45px}
+.badge {
+  display:inline-block;
+  border:1px solid #287849;
+  background:#103721;
+  color:var(--green);
+  padding:8px 13px;
+  border-radius:30px;
+  font-size:13px;
+}
+h1 {font-size:clamp(35px,7vw,64px);margin:22px 0 15px;line-height:1.05}
+h1 span {color:var(--green)}
+.subtitle {
+  max-width:680px;
+  margin:0 auto;
+  color:var(--muted);
+  line-height:1.7;
+  font-size:17px;
+}
+.actions {
+  display:flex;justify-content:center;gap:12px;
+  flex-wrap:wrap;margin-top:28px;
+}
+section {padding:30px 0 55px}
+.section-title {text-align:center;font-size:30px;margin:0 0 12px}
+.section-sub {text-align:center;color:var(--muted);margin:0 0 28px;line-height:1.6}
+.cards {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+.card {
+  background:linear-gradient(150deg,var(--panel2),var(--panel));
+  border:1px solid var(--border);
+  border-radius:17px;
+  padding:23px;
+}
+.card h3 {font-size:22px;margin:0 0 10px}
+.card p {color:var(--muted);line-height:1.6}
+.price {font-size:31px;font-weight:900;margin:18px 0}
+.price small {font-size:14px;color:var(--muted);font-weight:normal}
+ul {padding-left:20px;line-height:2;color:#d6e8dc}
+.tag {
+  display:inline-block;
+  background:#174c2e;
+  color:var(--green);
+  border-radius:6px;
+  padding:5px 8px;
+  font-size:12px;
+  font-weight:bold;
+}
+.disabled-card {opacity:.58}
+.notice {
+  border:1px solid #31533d;
+  background:#0c1c12;
+  padding:17px;
+  border-radius:12px;
+  color:var(--muted);
+  line-height:1.7;
+}
+.steps {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.step {
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:18px;
+  background:#0c1911;
+}
+.step b {color:var(--green);font-size:22px}
+.step p {color:var(--muted);line-height:1.6}
+footer {
+  border-top:1px solid var(--border);
+  color:var(--muted);
+  text-align:center;
+  padding:25px 12px;
+  font-size:13px;
+  line-height:1.8;
+}
+.modal-bg {
+  position:fixed;inset:0;background:#000b;
+  z-index:20;display:none;align-items:center;
+  justify-content:center;padding:15px;
+}
+.modal-bg.show {display:flex}
+.modal {
+  background:#0d1b12;border:1px solid var(--border);
+  border-radius:17px;padding:24px;width:min(420px,100%);
+  max-height:90vh;overflow:auto;
+}
+.modal h2 {margin-top:0}
+.modal label {display:block;margin:14px 0 6px;color:var(--muted)}
+.modal input {
+  width:100%;padding:13px;border-radius:9px;
+  border:1px solid var(--border);background:#07110d;
+  color:white;outline:none;
+}
+.modal input:focus {border-color:var(--green)}
+.modal .btn {width:100%;margin-top:13px}
+.close-row {display:flex;justify-content:space-between;align-items:center}
+.close-btn {background:none;border:0;color:white;font-size:25px}
+#account {display:none}
+.account-box {
+  margin:25px 0;background:var(--panel);
+  border:1px solid var(--border);border-radius:16px;padding:22px;
+}
+.status {color:var(--green);font-weight:bold}
+.error {color:var(--red);font-size:14px;line-height:1.5}
+.success {color:var(--green);font-size:14px;line-height:1.5}
+@media(max-width:750px) {
+  header {padding:13px 4%;align-items:flex-start}
+  .logo {font-size:19px;padding-top:7px}
+  .cards,.steps {grid-template-columns:1fr}
+  .hero {padding-top:48px}
+  .card {padding:20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SERVER<span>HUB</span></div>
+  <nav>
+    <button class="btn" onclick="goTo('plans')">Тарифы</button>
+    <button class="btn" id="loginTop" onclick="openModal('login')">Войти</button>
+    <button class="btn btn-green" id="registerTop" onclick="openModal('register')">Регистрация</button>
+    <button class="btn" id="accountTop" style="display:none" onclick="showAccount()">Мой аккаунт</button>
+  </nav>
+</header>
+
+<main>
+  <div id="home">
+    <div class="hero">
+      <span class="badge">● СЕРВИС ДЛЯ MINECRAFT</span>
+      <h1>Твой сервер.<br><span>Твои правила.</span></h1>
+      <p class="subtitle">
+        SERVERHUB — панель для управления игровым сервером.
+        Начни с бесплатного тарифа и изучи возможности сервиса.
+      </p>
+      <div class="actions">
+        <button class="btn btn-green" onclick="startFree()">Начать бесплатно →</button>
+        <button class="btn" onclick="goTo('how')">Как это работает</button>
+      </div>
+    </div>
+
+    <section id="plans">
+      <h2 class="section-title">Выбери свой тариф</h2>
+      <p class="section-sub">Сейчас доступен только бесплатный тестовый тариф.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="tag">ДОСТУПЕН</span>
+          <h3 style="margin-top:15px">FREE</h3>
+          <p>Для знакомства с SERVERHUB.</p>
+          <div class="price">0 ₽ <small>/ бесплатно</small></div>
+          <ul>
+            <li>Доступ к тестовому аккаунту</li>
+            <li>Базовая панель управления</li>
+            <li>Перерыв после 12 часов</li>
+            <li>Без оплаты</li>
+          </ul>
+          <button class="btn btn-green" style="width:100%" onclick="startFree()">Выбрать FREE</button>
+        </div>
+
+        <div class="card disabled-card">
+          <span class="tag">СКОРО</span>
+          <h3 style="margin-top:15px">PLUS</h3>
+          <p>Для тех, кому нужно больше возможностей.</p>
+          <div class="price">— <small>пока недоступен</small></div>
+          <ul>
+            <li>Дополнительные возможности</li>
+            <li>Расширенные настройки</li>
+            <li>Будет доступен позднее</li>
+          </ul>
+          <button class="btn" style="width:100%" disabled>Скоро</button>
+        </div>
+
+        <div class="card disabled-card">
+          <span class="tag">СКОРО</span>
+          <h3 style="margin-top:15px">PRO</h3>
+          <p>Расширенный тариф сервиса.</p>
+          <div class="price">— <small>пока недоступен</small></div>
+          <ul>
+            <li>Расширенное управление</li>
+            <li>Дополнительные настройки</li>
+            <li>Будет доступен позднее</li>
+          </ul>
+          <button class="btn" style="width:100%" disabled>Скоро</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <h2 class="section-title">Как это работает?</h2>
+      <p class="section-sub">Начинаем с простой тестовой версии.</p>
+      <div class="steps">
+        <div class="step">
+          <b>01</b>
+          <h3>Создай аккаунт</h3>
+          <p>Зарегистрируйся в демоверсии сайта.</p>
+        </div>
+        <div class="step">
+          <b>02</b>
+          <h3>Выбери FREE</h3>
+          <p>Бесплатный тариф не требует оплаты.</p>
+        </div>
+        <div class="step">
+          <b>03</b>
+          <h3>Подключи свой сервер</h3>
+          <p>В будущем добавим настоящее подключение к серверу и управление им.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="notice">
+        <b style="color:var(--green)">Важно знать</b><br>
+        Сейчас сайт — демонстрационная версия. Он не запускает Minecraft-сервер
+        и не подключается к твоему компьютеру или телефону. Для настоящего запуска
+        потребуется отдельная программа или серверная часть.
+      </div>
+    </section>
+  </div>
+  <div id="account">
+    <section>
+      <h2 class="section-title">Мой аккаунт</h2>
+      <div class="account-box">
+        <p>Пользователь: <b id="accountName"></b></p>
+        <p>Электронная почта: <span id="accountEmail"></span></p>
+        <p>Тариф: <span class="status">FREE — бесплатно</span></p>
+        <p>Состояние: <span class="status">Аккаунт создан</span></p>
+        <p class="section-sub" style="text-align:left">
+          Настоящий запуск сервера пока не подключён.
+        </p>
+        <button class="btn btn-green" onclick="startFree()">Выбрать FREE</button>
+        <button class="btn" onclick="goTo('home')">На главную</button>
+        <button class="btn" onclick="logout()">Выйти из аккаунта</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <b>SERVERHUB</b> — тестовая версия сайта<br>
+  Бесплатная демоверсия. Платные тарифы отключены.<br>
+  © 2026 SERVERHUB
+</footer>
+
+<div class="modal-bg" id="modalBg" onclick="backgroundClose(event)">
+  <div class="modal">
+    <div class="close-row">
+      <h2 id="modalTitle">Регистрация</h2>
+      <button class="close-btn" onclick="closeModal()" aria-label="Закрыть">×</button>
+    </div>
+    <p id="modalInfo" style="color:var(--muted);line-height:1.5">
+      Создай демоаккаунт для тестирования сайта.
+    </p>
+    <form id="authForm">
+      <div id="nameField">
+        <label for="nickname">Никнейм</label>
+        <input id="nickname" maxlength="24" autocomplete="nickname" placeholder="Например, Player123">
+      </div>
+
+      <label for="email">Электронная почта</label>
+      <input id="email" type="email" maxlength="100" autocomplete="email" placeholder="name@example.com" required>
+
+      <label for="password">Пароль</label>
+      <input id="password" type="password" minlength="6" maxlength="100" autocomplete="current-password" placeholder="Не менее 6 символов" required>
+
+      <p id="formMessage" aria-live="polite"></p>
+
+      <button class="btn btn-green" type="submit" id="submitBtn">Создать аккаунт</button>
+      <button class="btn" type="button" id="switchBtn" onclick="switchMode()">Уже есть аккаунт? Войти</button>
+    </form>
+
+    <p style="font-size:12px;color:var(--muted);line-height:1.5">
+      Это только демонстрация. Не используй настоящий пароль:
+      данные аккаунта хранятся локально в этом браузере и не являются защищённой онлайн-регистрацией.
+    </p>
+  </div>
+</div>
+
+<script>
+const STORE_KEY = "serverhub_demo_users_v1";
+const SESSION_KEY = "serverhub_demo_session_v1";
+let authMode = "register";
+
+function readUsers() {
+  try {
+    const value = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+    return value && typeof value === "object" ? value : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function getSession() {
+  try {
+    return localStorage.getItem(SESSION_KEY) || "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function setMessage(text, type) {
+  const el = document.getElementById("formMessage");
+  el.className = type || "";
+  el.textContent = text;
+}
+
+function openModal(mode) {
+  authMode = mode;
+  document.getElementById("modalBg").classList.add("show");
+  document.getElementById("authForm").reset();
+  setMessage("", "");
+  updateModal();
+}
+
+function closeModal() {
+  document.getElementById("modalBg").classList.remove("show");
+}
+
+function backgroundClose(event) {
+  if (event.target.id === "modalBg") closeModal();
+}
+
+function updateModal() {
+  const registering = authMode === "register";
+
+  document.getElementById("modalTitle").textContent =
+    registering ? "Регистрация" : "Вход";
+
+  document.getElementById("modalInfo").textContent =
+    registering
+      ? "Создай демоаккаунт для тестирования сайта."
+      : "Войди в демоаккаунт, созданный на этом устройстве.";
+
+  document.getElementById("nameField").style.display =
+    registering ? "block" : "none";
+
+  document.getElementById("nickname").required = registering;
+
+  document.getElementById("submitBtn").textContent =
+    registering ? "Создать аккаунт" : "Войти";
+
+  document.getElementById("switchBtn").textContent =
+    registering ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Регистрация";
+}
+
+function switchMode() {
+  authMode = authMode === "register" ? "login" : "register";
+  document.getElementById("authForm").reset();
+  setMessage("", "");
+  updateModal();
+}
+
+document.getElementById("authForm").addEventListener("submit", function(event) {
+  event.preventDefault();
+  setMessage("", "");
+
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const password = document.getElementById("password").value;
+  const nickname = document.getElementById("nickname").value.trim();
+
+  if (!email || !email.includes("@")) {
+    setMessage("Введи корректную электронную почту.", "error");
+    return;
+  }
+
+  if (password.length < 6) {
+    setMessage("Пароль должен содержать минимум 6 символов.", "error");
+    return;
+  }
+
+  const users = readUsers();
+
+  if (authMode === "register") {
+    if (nickname.length < 2) {
+      setMessage("Никнейм должен содержать минимум 2 символа.", "error");
+      return;
+    }
+
+    if (users[email]) {
+      setMessage("Этот адрес уже зарегистрирован на этом устройстве. Попробуй войти.", "error");
+      return;
+    }
+
+    // Только для демонстрации. Не используй настоящий пароль!
+    users[email] = {
+      nickname: nickname,
+      password: password,
+      plan: "FREE",
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(users));
+      localStorage.setItem(SESSION_KEY, email);
+    } catch (e) {
+      setMessage("Не удалось сохранить данные. Проверь настройки браузера.", "error");
+      return;
+    }
+
+    closeModal();
+    refreshHeader();
+    showAccount();
+    alert("Демоаккаунт создан! Добро пожаловать в SERVERHUB.");
+
+  } else {
+    if (!users[email] || users[email].password !== password) {
+      setMessage("Неверная почта или пароль. Аккаунт должен быть создан в этом браузере.", "error");
+      return;
+    }
+
+    try {
+      localStorage.setItem(SESSION_KEY, email);
+    } catch (e) {
+      setMessage("Не удалось сохранить вход в аккаунт.", "error");
+      return;
+    }
+
+    closeModal();
+    refreshHeader();
+    showAccount();
+  }
+});
+
+function refreshHeader() {
+  const email = getSession();
+  const loggedIn = !!email && !!readUsers()[email];
+
+  document.getElementById("loginTop").style.display =
+    loggedIn ? "none" : "inline-block";
+
+  document.getElementById("registerTop").style.display =
+    loggedIn ? "none" : "inline-block";
+
+  document.getElementById("accountTop").style.display =
+    loggedIn ? "inline-block" : "none";
+}
+
+function showAccount() {
+  const email = getSession();
+  const user = readUsers()[email];
+
+  if (!user) {
+    openModal("login");
+    return;
+  }
+
+  document.getElementById("home").style.display = "none";
+  document.getElementById("account").style.display = "block";
+  document.getElementById("accountName").textContent = user.nickname;
+  document.getElementById("accountEmail").textContent = email;
+
+  window.scrollTo(0, 0);
+}
+
+function goTo(id) {
+  if (id === "home") {
+    document.getElementById("home").style.display = "block";
+    document.getElementById("account").style.display = "none";
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  document.getElementById("home").style.display = "block";
+  document.getElementById("account").style.display = "none";
+
+  const target = document.getElementById(id);
+
+  if (target) {
+    target.scrollIntoView({behavior:"smooth"});
+  }
+}
+
+function startFree() {
+  const email = getSession();
+  const users = readUsers();
+  const user = users[email];
+
+  if (!user) {
+    openModal("register");
+    return;
+  }
+
+  user.plan = "FREE";
+  users[email] = user;
+
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(users));
+  } catch (e) {}
+
+  alert("Тариф FREE выбран! Оплата не требуется. Запуск Minecraft-сервера пока не подключён.");
+
+  showAccount();
+  refreshHeader();
+}
+
+function logout() {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch (e) {}
+
+  refreshHeader();
+  goTo("home");
+
+  alert("Ты вышел из демоаккаунта.");
+}
+
+refreshHeader();
+</script>
+</body>
+</html>                                                   
