@@ -629,11 +629,87 @@ function toggleServer(start) {
     "Демо остановлено. Реальный Minecraft-сервер не затронут.";
 }
 
+
 function changeVersion() {
-  const versions = [
-    "1.20.1 (демо)", "1.19.4 (демо)", "1.18.2 (демо)",
-    "1.16.5 (демо)", "1.12.2 (демо)", "1.8.9 (демо)"
-  ];
+  const edition = prompt(
+    "ВЫБЕРИ ИЗДАНИЕ MINECRAFT:\n\n" +
+    "1 — Minecraft PE / Bedrock\n" +
+    "2 — Minecraft Java Edition"
+  );
+
+  if (edition !== "1" && edition !== "2") return;
+
+  const bedrock = edition === "1";
+
+  const versions = bedrock
+    ? [
+        "1.1.5", "1.1.7", "1.2.0", "1.2.1",
+        "1.2.5", "1.2.6", "1.2.10", "1.2.13",
+        "1.4.0", "1.5.0", "1.6.0", "1.7.0",
+        "1.8.0", "1.9.0", "1.10.0", "1.11.0",
+        "1.12.0", "1.13.0", "1.14.0", "1.16.0",
+        "1.17.0", "1.18.0", "1.19.0", "1.20.0",
+        "1.21.0", "1.21.50", "1.21.60",
+        "1.21.70", "1.21.80", "1.21.90",
+        "1.21.100", "1.21.111", "1.21.120",
+        "1.21.130"
+      ]
+    : [
+        "1.0", "1.1", "1.2.5", "1.3.2",
+        "1.4.7", "1.5.2", "1.6.4", "1.7.10",
+        "1.8.9", "1.9.4", "1.10.2", "1.11.2",
+        "1.12.2", "1.13.2", "1.14.4", "1.15.2",
+        "1.16.5", "1.17.1", "1.18.2", "1.19.4",
+        "1.20.1", "1.20.4", "1.20.6",
+        "1.21", "1.21.1", "1.21.4",
+        "1.21.5", "1.21.8"
+      ];
+
+  const list = versions.map(
+    (v, i) => (i + 1) + " — " + v
+  ).join("\n");
+
+  const answer = prompt(
+    (bedrock ? "MINECRAFT PE / BEDROCK" :
+      "MINECRAFT JAVA EDITION") +
+    "\n\nВведи номер версии из списка\n" +
+    "или напиши свою версию вручную:\n\n" + list
+  );
+
+  if (!answer || !answer.trim()) return;
+
+  const n = Number(answer.trim());
+  let chosen;
+
+  if (
+    Number.isInteger(n) &&
+    n >= 1 &&
+    n <= versions.length
+  ) {
+    chosen = versions[n - 1];
+  } else {
+    chosen = answer.trim();
+
+    if (!/^\d+\.\d+(\.\d+)*$/.test(chosen)) {
+      alert("Неверный формат версии!");
+      return;
+    }
+  }
+
+  serverVersion =
+    chosen + (bedrock ? " (Bedrock, демо)" :
+      " (Java, демо)");
+
+  saveServer();
+  renderServer();
+
+  document.getElementById("serverMessage").textContent =
+    "Выбрано: Minecraft " + chosen +
+    (bedrock ? " Bedrock Edition." :
+      " Java Edition.") +
+    " Это пока демонстрационный выбор.";
+}
+  
   const index = versions.indexOf(serverVersion);
   serverVersion = versions[(index + 1) % versions.length];
   saveServer();
