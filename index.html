@@ -1,4 +1,4 @@
-
+он
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -735,6 +735,22 @@ function logout() {
 }
 
 refreshHeader();
+  
+document.querySelectorAll("button:disabled").forEach(function(button) {
+  button.disabled = false;
+});
+
+document.querySelectorAll(".card button").forEach(function(button) {
+  const title = button.closest(".card").querySelector("h3");
+  const plan = title ? title.textContent.trim() : "";
+
+  if (plan === "PLUS" || plan === "PRO") {
+    button.onclick = function() {
+      alert("Тариф " + plan + " пока в разработке. Сейчас доступен только FREE.");
+    };
+  }
+});
+  
 </script>
 </body>
   </html>
